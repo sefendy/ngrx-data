@@ -1,3 +1,5 @@
+import { CoursesDataService } from './services/courses-data.service';
+import { CoursesResolver } from './services/courses.resolver';
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {HomeComponent} from './home/home.component';
@@ -25,12 +27,16 @@ import { EntityDataService, EntityDefinitionService, EntityMetadataMap} from '@n
 import {compareCourses, Course} from './model/course';
 
 import {compareLessons, Lesson} from './model/lesson';
+import { CourseEntityService } from './services/course-entity.service';
 
 
 export const coursesRoutes: Routes = [
   {
     path: '',
-    component: HomeComponent
+    component: HomeComponent,
+    resolve: {
+      courses: CoursesResolver
+    }
 
   },
   {
@@ -38,6 +44,12 @@ export const coursesRoutes: Routes = [
     component: CourseComponent
   }
 ];
+
+const entityMetadata: EntityMetadataMap = {
+  Course: {
+    sortComparer: compareCourses
+  }
+};
 
 @NgModule({
   imports: [
@@ -73,13 +85,18 @@ export const coursesRoutes: Routes = [
   ],
   entryComponents: [EditCourseDialogComponent],
   providers: [
-    CoursesHttpService
+    CoursesHttpService,
+    CourseEntityService,
+    CoursesResolver,
+    CoursesDataService
   ]
 })
 export class CoursesModule {
 
-  constructor() {
-
+  constructor(private eds: EntityDefinitionService, private entityDataSerice: EntityDataService,
+    private coursesDataService: CoursesDataService) {
+    eds.registerMetadataMap(entityMetadata);
+    entityDataSerice.registerService('Course', coursesDataService)
   }
 
 
